@@ -2,33 +2,40 @@
 // Cloudflare Pages Function: /api/risk
 // ============================================
 
-import type { Env } from '../lib/db';
-import { hasDatabase } from '../lib/db';
-import { riskRepo } from '../lib/repositories/risk';
+import { type Env, hasDatabase, ok, err } from '../lib/db';
+import { riskRepo, validateRiskUpdate } from '../lib/repositories/risk';
 
 const getUserId = (_ctx: EventContext<Env, string, unknown>) => 'dev';
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const userId = getUserId(context);
-  if (!hasDatabase(context.env)) {
-    return Response.json({ data: riskRepo.getMock(), meta: { mock: true } });
-  }
+  if (!hasDatabase(context.env)) return ok(riskRepo.getMock(), { mock: true });
+
   try {
     const settings = await riskRepo.get(context.env.DB!, userId);
-    return Response.json({ data: settings });
-  } catch { return Response.json({ error: 'Failed to fetch risk settings' }, { status: 500 }); }
+    return ok(settings);
+  } catch (e) {
+    console.error('[/api/risk GET]', e);
+    return err('Failed to fetch risk settings');
+  }
 };
 
 export const onRequestPut: PagesFunction<Env> = async (context) => {
   const userId = getUserId(context);
   let body: Record<string, unknown>;
   try { body = await context.request.json() as Record<string, unknown>; }
-  catch { return Response.json({ error: 'Invalid request body' }, { status: 400 }); }
+  catch { return err('Invalid JSON body', 400); }
 
-  if (!hasDatabase(context.env)) return Response.json({ data: { ...riskRepo.getMock(), ...body }, meta: { mock: true } });
+  const validationError = validateRiskUpdate(body);
+  if (validationError) return err(validationError, 400);
+
+  if (!hasDatabase(context.env)) return ok({ ...riskRepo.getMock(), ...body }, { mock: true });
 
   try {
     const settings = await riskRepo.upsert(context.env.DB!, userId, body as any);
-    return Response.json({ data: settings });
-  } catch { return Response.json({ error: 'Failed to update risk settings' }, { status: 500 }); }
+    return ok(settings);
+  } catch (e) {
+    console.error('[/api/risk PUT]', e);
+    return err('Failed to update risk settings');
+  }
 };
