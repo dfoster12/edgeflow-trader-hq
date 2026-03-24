@@ -9,6 +9,7 @@ import {
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, BarChart, Bar } from 'recharts';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import MarketNewsPanel from '@/components/MarketNewsPanel';
 
 const miniChartData = Array.from({ length: 40 }, (_, i) => ({
   t: i,
@@ -235,6 +236,9 @@ export default function Dashboard() {
 
         {/* Right Panel - 1 col */}
         <div className="space-y-4">
+          {/* Market News */}
+          <MarketNewsPanel />
+
           {/* Watchlist */}
           <div className="glass-card p-5">
             <div className="flex items-center gap-2 mb-4">
