@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Outlet } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,7 +13,23 @@ import AIAssistant from "./pages/AIAssistant";
 import SettingsPage from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 30_000,
+    },
+  },
+});
+
+function LayoutWrapper() {
+  return (
+    <AppLayout>
+      <Outlet />
+    </AppLayout>
+  );
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -22,13 +38,15 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<AppLayout><Dashboard /></AppLayout>} />
-          <Route path="/trades" element={<AppLayout><Trades /></AppLayout>} />
-          <Route path="/journal" element={<AppLayout><Journal /></AppLayout>} />
-          <Route path="/analytics" element={<AppLayout><Analytics /></AppLayout>} />
-          <Route path="/risk" element={<AppLayout><RiskManager /></AppLayout>} />
-          <Route path="/ai" element={<AppLayout><AIAssistant /></AppLayout>} />
-          <Route path="/settings" element={<AppLayout><SettingsPage /></AppLayout>} />
+          <Route element={<LayoutWrapper />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/trades" element={<Trades />} />
+            <Route path="/journal" element={<Journal />} />
+            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/risk" element={<RiskManager />} />
+            <Route path="/ai" element={<AIAssistant />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
