@@ -1,8 +1,8 @@
 // ============================================
-// Watchlist Repository
+// Watchlist Repository (Production-Ready)
 // ============================================
 
-import { queryAll, execute } from '../db';
+import { queryAll, queryOne, execute } from '../db';
 import { mockWatchlist } from '../mock-data';
 
 export interface WatchlistRow {
@@ -14,24 +14,41 @@ export interface WatchlistRow {
 
 export const watchlistRepo = {
   async list(db: D1Database, userId: string): Promise<WatchlistRow[]> {
-    return queryAll<WatchlistRow>(db, 'SELECT * FROM watchlist WHERE user_id = ? ORDER BY created_at', [userId]);
+    return queryAll<WatchlistRow>(
+      db,
+      'SELECT * FROM watchlist WHERE user_id = ? ORDER BY created_at',
+      [userId],
+    );
   },
 
   async add(db: D1Database, userId: string, symbol: string): Promise<WatchlistRow> {
+    const normalized = symbol.toUpperCase().trim();
+    if (!normalized) throw new Error('Symbol cannot be empty');
+
     const id = crypto.randomUUID();
     const now = new Date().toISOString();
+
+    // INSERT OR IGNORE handles the UNIQUE(user_id, symbol) constraint
     await execute(db,
       'INSERT OR IGNORE INTO watchlist (id, user_id, symbol, created_at) VALUES (?, ?, ?, ?)',
-      [id, userId, symbol.toUpperCase(), now],
+      [id, userId, normalized, now],
     );
-    const rows = await queryAll<WatchlistRow>(db,
-      'SELECT * FROM watchlist WHERE user_id = ? AND symbol = ?', [userId, symbol.toUpperCase()]);
-    return rows[0];
+
+    // Always return the row (may be pre-existing if IGNORE triggered)
+    const row = await queryOne<WatchlistRow>(db,
+      'SELECT * FROM watchlist WHERE user_id = ? AND symbol = ?',
+      [userId, normalized],
+    );
+    if (!row) throw new Error('Failed to read back watchlist entry');
+    return row;
   },
 
   async remove(db: D1Database, userId: string, symbol: string): Promise<boolean> {
-    const result = await execute(db, 'DELETE FROM watchlist WHERE user_id = ? AND symbol = ?',
-      [userId, symbol.toUpperCase()]);
+    const result = await execute(
+      db,
+      'DELETE FROM watchlist WHERE user_id = ? AND symbol = ?',
+      [userId, symbol.toUpperCase().trim()],
+    );
     return (result.meta?.changes ?? 0) > 0;
   },
 

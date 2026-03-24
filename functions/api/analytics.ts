@@ -1,10 +1,10 @@
 // ============================================
 // Cloudflare Pages Function: /api/analytics
 // ============================================
-// Computes analytics directly from the trades table — no separate storage.
+// All analytics are computed on-the-fly from persisted trades.
+// No separate analytics table needed.
 
-import type { Env } from '../lib/db';
-import { hasDatabase } from '../lib/db';
+import { type Env, hasDatabase, ok, err } from '../lib/db';
 import { analyticsRepo } from '../lib/repositories/analytics';
 
 const getUserId = (_ctx: EventContext<Env, string, unknown>) => 'dev';
@@ -13,14 +13,20 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const userId = getUserId(context);
 
   if (!hasDatabase(context.env)) {
-    return Response.json({ data: null, error: 'No database connected — using client-side mock data', meta: { mock: true } });
+    return ok(null, { mock: true, message: 'No D1 database bound — frontend uses client-side mock data' });
   }
 
   try {
-    const [stats, equityCurve] = await Promise.all([
+    const [stats, equityCurve, weekdayPerformance, setupPerformance] = await Promise.all([
       analyticsRepo.getStats(context.env.DB!, userId),
       analyticsRepo.getEquityCurve(context.env.DB!, userId),
+      analyticsRepo.getWeekdayPerformance(context.env.DB!, userId),
+      analyticsRepo.getSetupPerformance(context.env.DB!, userId),
     ]);
-    return Response.json({ data: { stats, equityCurve } });
-  } catch { return Response.json({ error: 'Failed to compute analytics' }, { status: 500 }); }
+
+    return ok({ stats, equityCurve, weekdayPerformance, setupPerformance });
+  } catch (e) {
+    console.error('[/api/analytics GET]', e);
+    return err('Failed to compute analytics');
+  }
 };
