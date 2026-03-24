@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Bell, Plus, User, TrendingUp, Menu } from 'lucide-react';
+import { Search, Bell, Plus, User, TrendingUp, Menu, Settings, HelpCircle, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { notifications } from '@/data/mockData';
 
