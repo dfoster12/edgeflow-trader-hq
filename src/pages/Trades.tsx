@@ -124,7 +124,12 @@ export default function Trades() {
                 </tr>
               </thead>
               <tbody>
-                {allTrades.map((trade) => (
+                {allTrades.map((trade) => {
+                  const exitPrice = trade.exit ?? (trade as any).exit_price ?? 0;
+                  const entryPrice = trade.entry ?? 0;
+                  const pnl = trade.pnl ?? 0;
+                  const rMul = trade.rMultiple ?? (trade as any).r_multiple ?? 0;
+                  return (
                   <tr key={trade.id} className="border-b border-border/50 hover:bg-muted/20 transition-colors cursor-pointer group">
                     <td className="px-5 py-4 text-muted-foreground text-xs">{trade.date}</td>
                     <td className="px-5 py-4 font-semibold text-foreground">{trade.symbol}</td>
@@ -136,21 +141,22 @@ export default function Trades() {
                         {trade.side}
                       </span>
                     </td>
-                    <td className="px-5 py-4 font-mono text-foreground">{trade.entry.toFixed(2)}</td>
-                    <td className="px-5 py-4 font-mono text-foreground">{trade.exit.toFixed(2)}</td>
+                    <td className="px-5 py-4 font-mono text-foreground">{entryPrice.toFixed(2)}</td>
+                    <td className="px-5 py-4 font-mono text-foreground">{exitPrice.toFixed(2)}</td>
                     <td className="px-5 py-4 text-foreground">{trade.size}</td>
-                    <td className={cn('px-5 py-4 font-semibold font-mono', trade.pnl >= 0 ? 'text-profit' : 'text-loss')}>
-                      {trade.pnl >= 0 ? '+' : ''}${trade.pnl.toFixed(2)}
+                    <td className={cn('px-5 py-4 font-semibold font-mono', pnl >= 0 ? 'text-profit' : 'text-loss')}>
+                      {pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}
                     </td>
-                    <td className={cn('px-5 py-4 font-mono text-sm', trade.rMultiple >= 0 ? 'text-profit' : 'text-loss')}>
-                      {trade.rMultiple > 0 ? '+' : ''}{trade.rMultiple}R
+                    <td className={cn('px-5 py-4 font-mono text-sm', rMul >= 0 ? 'text-profit' : 'text-loss')}>
+                      {rMul > 0 ? '+' : ''}{rMul}R
                     </td>
                     <td className="px-5 py-4 text-xs text-muted-foreground">{trade.session}</td>
                     <td className="px-5 py-4">
                       <span className="px-2 py-0.5 rounded bg-profit/10 text-profit text-xs font-medium">{trade.status}</span>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
