@@ -1,10 +1,16 @@
-import { riskSettings } from '@/data/mockData';
+import { LoadingState, ErrorState } from '@/components/StateViews';
+import { useRiskSettings } from '@/hooks/use-risk';
 import { Shield, AlertTriangle, Lock, CheckCircle2, XCircle, Flame, Pause, TrendingDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
 export default function RiskManager() {
-  const risk = riskSettings;
+  const { data: risk, isLoading, error, refetch } = useRiskSettings();
+
+  if (isLoading) return <LoadingState message="Loading risk settings..." />;
+  if (error) return <ErrorState message="Failed to load risk settings" onRetry={() => refetch()} />;
+  if (!risk) return null;
+
   const dailyLossPercent = (risk.todayLoss / risk.maxDailyLoss) * 100;
   const tradePercent = (risk.todayTradeCount / risk.maxTradesPerDay) * 100;
 
@@ -41,7 +47,6 @@ export default function RiskManager() {
 
       {/* Risk Limits */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Max Daily Loss */}
         <div className="glass-card p-5">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Daily Loss Limit</span>
@@ -54,7 +59,6 @@ export default function RiskManager() {
           <p className="text-xs text-muted-foreground mt-2">{dailyLossPercent.toFixed(0)}% used</p>
         </div>
 
-        {/* Max Weekly Loss */}
         <div className="glass-card p-5">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Weekly Loss Limit</span>
@@ -67,7 +71,6 @@ export default function RiskManager() {
           <p className="text-xs text-muted-foreground mt-2">9% used</p>
         </div>
 
-        {/* Trades Per Day */}
         <div className="glass-card p-5">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Trades Today</span>
@@ -80,7 +83,6 @@ export default function RiskManager() {
           <p className="text-xs text-muted-foreground mt-2">{risk.maxTradesPerDay - risk.todayTradeCount} remaining</p>
         </div>
 
-        {/* Risk Per Trade */}
         <div className="glass-card p-5">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Risk Per Trade</span>
@@ -92,7 +94,6 @@ export default function RiskManager() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Streaks */}
         <div className="glass-card p-5">
           <h3 className="text-sm font-semibold text-foreground mb-4">Streak Tracking</h3>
           <div className="grid grid-cols-2 gap-4">
@@ -109,7 +110,6 @@ export default function RiskManager() {
           </div>
         </div>
 
-        {/* Lockout Warning */}
         <div className="glass-card p-5 border-warning/20">
           <div className="flex items-center gap-2 mb-4">
             <AlertTriangle className="h-4 w-4 text-warning" />
@@ -124,7 +124,6 @@ export default function RiskManager() {
           </div>
         </div>
 
-        {/* Behavioral Rules */}
         <div className="glass-card p-5 lg:col-span-2">
           <h3 className="text-sm font-semibold text-foreground mb-4">Behavioral Rules Checklist</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
