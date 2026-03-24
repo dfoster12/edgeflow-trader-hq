@@ -9,6 +9,7 @@ interface AppHeaderProps {
 
 export function AppHeader({ onMenuToggle }: AppHeaderProps) {
   const [showNotifs, setShowNotifs] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   return (
     <header className="sticky top-0 z-40 h-14 md:h-16 flex items-center justify-between px-3 md:px-6 border-b border-border bg-background/80 backdrop-blur-xl gap-2">
