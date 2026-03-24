@@ -1,8 +1,9 @@
-import { analyticsData } from '@/data/mockData';
 import { KpiCard } from '@/components/KpiCard';
+import { LoadingState, ErrorState } from '@/components/StateViews';
+import { useAnalytics } from '@/hooks/use-analytics';
 import {
   AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, BarChart, Bar, PieChart, Pie, Cell,
-  CartesianGrid, RadarChart, PolarGrid, PolarAngleAxis, Radar
+  CartesianGrid
 } from 'recharts';
 import { TrendingUp, Target, Percent, BarChart3, Award, ArrowDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -18,6 +19,12 @@ const tooltipStyle = {
 };
 
 export default function Analytics() {
+  const { data: analyticsData, isLoading, error, refetch } = useAnalytics();
+
+  if (isLoading) return <LoadingState message="Loading analytics..." />;
+  if (error) return <ErrorState message="Failed to load analytics" onRetry={() => refetch()} />;
+  if (!analyticsData) return null;
+
   const { stats, equityCurve, weekdayPerformance, setupPerformance, timePerformance, dailyHeatmap } = analyticsData;
 
   const winLossData = [
