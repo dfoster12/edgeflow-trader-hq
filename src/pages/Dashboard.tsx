@@ -9,6 +9,7 @@ import {
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, BarChart, Bar } from 'recharts';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import MarketNewsPanel from '@/components/MarketNewsPanel';
 
 const miniChartData = Array.from({ length: 40 }, (_, i) => ({
   t: i,
