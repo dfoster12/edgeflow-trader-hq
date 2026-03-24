@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Bell, Plus, User, TrendingUp, Menu } from 'lucide-react';
+import { Search, Bell, Plus, User, TrendingUp, Menu, Settings, HelpCircle, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { notifications } from '@/data/mockData';
 
@@ -9,6 +9,7 @@ interface AppHeaderProps {
 
 export function AppHeader({ onMenuToggle }: AppHeaderProps) {
   const [showNotifs, setShowNotifs] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   return (
     <header className="sticky top-0 z-40 h-14 md:h-16 flex items-center justify-between px-3 md:px-6 border-b border-border bg-background/80 backdrop-blur-xl gap-2">
@@ -81,12 +82,40 @@ export function AppHeader({ onMenuToggle }: AppHeaderProps) {
           )}
         </div>
 
-        {/* User */}
-        <button className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-muted/50 transition-colors">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-            <User className="h-4 w-4 text-primary-foreground" />
-          </div>
-        </button>
+        {/* User Profile */}
+        <div className="relative">
+          <button
+            onClick={() => setShowProfile(!showProfile)}
+            className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-muted/50 transition-colors"
+          >
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+              <User className="h-4 w-4 text-primary-foreground" />
+            </div>
+          </button>
+
+          {showProfile && (
+            <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-border bg-card/95 backdrop-blur-xl shadow-2xl p-1.5 animate-fade-in z-50">
+              <div className="px-3 py-2.5 border-b border-border mb-1">
+                <p className="text-sm font-semibold text-foreground">Trader</p>
+                <p className="text-xs text-muted-foreground">trader@edgeflow.io</p>
+              </div>
+              <a href="/settings" className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-foreground hover:bg-muted/50 transition-colors">
+                <Settings className="h-4 w-4 text-muted-foreground" />
+                Settings
+              </a>
+              <button className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-foreground hover:bg-muted/50 transition-colors w-full text-left">
+                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                Help & Support
+              </button>
+              <div className="border-t border-border mt-1 pt-1">
+                <button className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-loss hover:bg-muted/50 transition-colors w-full text-left">
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );
