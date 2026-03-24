@@ -5,10 +5,13 @@ import type { Trade, OpenPosition, CreateTradeInput, UpdateTradeInput, ApiRespon
 
 export const tradesService = {
   async getAll(): Promise<ApiResponse<Trade[]>> {
-    if (env.useMockData) {
+    if (env.useMockData) return { data: recentTrades as Trade[] };
+    try {
+      return await apiClient.get<Trade[]>('/trades');
+    } catch {
+      console.warn('Trades API unavailable, using mock data');
       return { data: recentTrades as Trade[] };
     }
-    return apiClient.get<Trade[]>('/trades');
   },
 
   async getById(id: string): Promise<ApiResponse<Trade>> {
@@ -17,7 +20,13 @@ export const tradesService = {
       if (!trade) throw new Error('Trade not found');
       return { data: trade as Trade };
     }
-    return apiClient.get<Trade>(`/trades/${id}`);
+    try {
+      return await apiClient.get<Trade>(`/trades/${id}`);
+    } catch {
+      const trade = recentTrades.find(t => t.id === id);
+      if (!trade) throw new Error('Trade not found');
+      return { data: trade as Trade };
+    }
   },
 
   async create(input: CreateTradeInput): Promise<ApiResponse<Trade>> {
@@ -49,23 +58,27 @@ export const tradesService = {
   },
 
   async delete(id: string): Promise<ApiResponse<{ success: boolean }>> {
-    if (env.useMockData) {
-      return { data: { success: true } };
-    }
+    if (env.useMockData) return { data: { success: true } };
     return apiClient.delete(`/trades/${id}`);
   },
 
   async getOpenPositions(): Promise<ApiResponse<OpenPosition[]>> {
-    if (env.useMockData) {
+    if (env.useMockData) return { data: mockPositions as OpenPosition[] };
+    try {
+      return await apiClient.get<OpenPosition[]>('/trades/positions');
+    } catch {
+      console.warn('Positions API unavailable, using mock data');
       return { data: mockPositions as OpenPosition[] };
     }
-    return apiClient.get<OpenPosition[]>('/trades/positions');
   },
 
   async getStats(): Promise<ApiResponse<typeof analyticsData.stats>> {
-    if (env.useMockData) {
+    if (env.useMockData) return { data: analyticsData.stats };
+    try {
+      return await apiClient.get('/trades/stats');
+    } catch {
+      console.warn('Trade stats API unavailable, using mock data');
       return { data: analyticsData.stats };
     }
-    return apiClient.get('/trades/stats');
   },
 };
