@@ -101,7 +101,7 @@ export default function Journal() {
                 {/* Tags */}
                 <div className="flex items-center gap-2 pt-2 border-t border-border/50">
                   <Tag className="h-3.5 w-3.5 text-muted-foreground" />
-                  {entry.tags.map(tag => (
+                  {(entry.tags ?? []).map(tag => (
                     <span key={tag} className={cn('px-2.5 py-1 rounded-full text-xs font-medium', tagColors[tag] || 'bg-muted text-muted-foreground')}>
                       {tag}
                     </span>

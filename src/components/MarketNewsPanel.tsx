@@ -22,7 +22,7 @@ export default function MarketNewsPanel() {
   const [filter, setFilter] = useState<string>('All');
 
   const filtered = (news ?? []).filter(
-    item => filter === 'All' || item.tags.includes(filter)
+    item => filter === 'All' || (item.tags ?? []).includes(filter)
   );
 
   return (
