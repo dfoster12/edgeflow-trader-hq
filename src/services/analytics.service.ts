@@ -5,9 +5,12 @@ import type { AnalyticsData, ApiResponse } from '@/types';
 
 export const analyticsService = {
   async getAll(): Promise<ApiResponse<AnalyticsData>> {
-    if (env.useMockData) {
+    if (env.useMockData) return { data: mockAnalytics as AnalyticsData };
+    try {
+      return await apiClient.get<AnalyticsData>('/analytics');
+    } catch {
+      console.warn('Analytics API unavailable, using mock data');
       return { data: mockAnalytics as AnalyticsData };
     }
-    return apiClient.get<AnalyticsData>('/analytics');
   },
 };

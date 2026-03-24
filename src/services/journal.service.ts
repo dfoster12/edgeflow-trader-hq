@@ -5,10 +5,13 @@ import type { JournalEntry, CreateJournalInput, UpdateJournalInput, ApiResponse 
 
 export const journalService = {
   async getAll(): Promise<ApiResponse<JournalEntry[]>> {
-    if (env.useMockData) {
+    if (env.useMockData) return { data: mockEntries as JournalEntry[] };
+    try {
+      return await apiClient.get<JournalEntry[]>('/journal');
+    } catch {
+      console.warn('Journal API unavailable, using mock data');
       return { data: mockEntries as JournalEntry[] };
     }
-    return apiClient.get<JournalEntry[]>('/journal');
   },
 
   async getById(id: string): Promise<ApiResponse<JournalEntry>> {
@@ -17,7 +20,13 @@ export const journalService = {
       if (!entry) throw new Error('Journal entry not found');
       return { data: entry as JournalEntry };
     }
-    return apiClient.get<JournalEntry>(`/journal/${id}`);
+    try {
+      return await apiClient.get<JournalEntry>(`/journal/${id}`);
+    } catch {
+      const entry = mockEntries.find(e => e.id === id);
+      if (!entry) throw new Error('Journal entry not found');
+      return { data: entry as JournalEntry };
+    }
   },
 
   async create(input: CreateJournalInput): Promise<ApiResponse<JournalEntry>> {
@@ -48,9 +57,7 @@ export const journalService = {
   },
 
   async delete(id: string): Promise<ApiResponse<{ success: boolean }>> {
-    if (env.useMockData) {
-      return { data: { success: true } };
-    }
+    if (env.useMockData) return { data: { success: true } };
     return apiClient.delete(`/journal/${id}`);
   },
 };

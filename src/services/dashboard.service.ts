@@ -5,16 +5,22 @@ import type { DashboardKpis, Notification, ApiResponse } from '@/types';
 
 export const dashboardService = {
   async getKpis(): Promise<ApiResponse<DashboardKpis>> {
-    if (env.useMockData) {
+    if (env.useMockData) return { data: mockKpis };
+    try {
+      return await apiClient.get<DashboardKpis>('/analytics/kpis');
+    } catch {
+      console.warn('KPIs API unavailable, using mock data');
       return { data: mockKpis };
     }
-    return apiClient.get<DashboardKpis>('/analytics/kpis');
   },
 
   async getNotifications(): Promise<ApiResponse<Notification[]>> {
-    if (env.useMockData) {
+    if (env.useMockData) return { data: mockNotifications as Notification[] };
+    try {
+      return await apiClient.get<Notification[]>('/notifications');
+    } catch {
+      console.warn('Notifications API unavailable, using mock data');
       return { data: mockNotifications as Notification[] };
     }
-    return apiClient.get<Notification[]>('/notifications');
   },
 };

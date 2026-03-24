@@ -5,16 +5,17 @@ import type { RiskSettings, ApiResponse } from '@/types';
 
 export const riskService = {
   async getSettings(): Promise<ApiResponse<RiskSettings>> {
-    if (env.useMockData) {
+    if (env.useMockData) return { data: mockRisk };
+    try {
+      return await apiClient.get<RiskSettings>('/risk');
+    } catch {
+      console.warn('Risk API unavailable, using mock data');
       return { data: mockRisk };
     }
-    return apiClient.get<RiskSettings>('/risk');
   },
 
   async updateSettings(settings: Partial<RiskSettings>): Promise<ApiResponse<RiskSettings>> {
-    if (env.useMockData) {
-      return { data: { ...mockRisk, ...settings } };
-    }
+    if (env.useMockData) return { data: { ...mockRisk, ...settings } };
     return apiClient.put<RiskSettings>('/risk', settings);
   },
 };
