@@ -236,8 +236,8 @@ export default function Dashboard() {
 
         {/* Right Panel - 1 col */}
         <div className="space-y-4">
-          {/* Watchlist */}
-          <div className="glass-card p-5">
+          {/* Market News */}
+          <MarketNewsPanel />
             <div className="flex items-center gap-2 mb-4">
               <Eye className="h-4 w-4 text-primary" />
               <h3 className="text-sm font-semibold text-foreground">Watchlist</h3>
