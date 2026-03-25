@@ -65,10 +65,23 @@ export default function Dashboard() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <h2 className="text-lg font-semibold text-foreground">NQ Futures</h2>
-                <span className="text-2xl font-bold text-foreground font-mono">21,512.75</span>
-                <span className="flex items-center gap-1 text-sm font-medium text-profit">
-                  <ArrowUpRight className="h-4 w-4" /> +176.25 (0.82%)
-                </span>
+                {(() => {
+                  const nq = watchlist?.find(w => w.symbol === 'NQ' || w.symbol === 'MNQ');
+                  const price = nq?.price ?? 0;
+                  const change = nq?.change ?? 0;
+                  const isUp = change >= 0;
+                  return (
+                    <>
+                      <span className="text-2xl font-bold text-foreground font-mono">
+                        {price > 0 ? price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '...'}
+                      </span>
+                      <span className={cn('flex items-center gap-1 text-sm font-medium', isUp ? 'text-profit' : 'text-loss')}>
+                        {isUp ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
+                        {isUp ? '+' : ''}{change.toFixed(2)}%
+                      </span>
+                    </>
+                  );
+                })()}
               </div>
               <div className="flex items-center gap-2">
                 {timeframes.map(tf => (

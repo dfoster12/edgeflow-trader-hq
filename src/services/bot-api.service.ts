@@ -13,6 +13,7 @@ import type {
   CandleData,
   EquityCurvePoint,
   AnalyticsData,
+  MarketQuote,
 } from '@/types';
 
 // --- Bot API response types ---
@@ -62,6 +63,13 @@ interface BotEquityPoint {
   pnl: number;
 }
 
+interface BotQuote {
+  symbol: string;
+  price: number;
+  change: number;
+  volume: string;
+}
+
 // --- Fetcher ---
 
 async function botFetch<T>(endpoint: string): Promise<T> {
@@ -81,6 +89,17 @@ export const botApiService = {
 
   async getState(): Promise<BotLiveState> {
     return botFetch<BotLiveState>('/api/state');
+  },
+
+  /** Get live quotes from Databento via bot API */
+  async getQuotes(): Promise<MarketQuote[]> {
+    const quotes = await botFetch<BotQuote[]>('/api/quotes');
+    return quotes.map(q => ({
+      symbol: q.symbol,
+      price: q.price,
+      change: q.change,
+      volume: q.volume,
+    }));
   },
 
   /** Transform bot state into dashboard KPIs */

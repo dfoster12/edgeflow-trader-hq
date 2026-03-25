@@ -9,21 +9,12 @@ export const marketDataService = {
     if (env.useMockData && !botApiService.isConfigured()) return { data: mockWatchlist as MarketQuote[] };
     if (botApiService.isConfigured()) {
       try {
-        // Build watchlist from bot state (bot only trades MNQ)
-        const state = await botApiService.getState();
-        const quote: MarketQuote = {
-          symbol: 'MNQ',
-          price: state.price,
-          change: 0,
-          volume: '0',
-        };
-        // Merge bot's live quote with the rest of the mock watchlist
-        const others = mockWatchlist.filter(w => w.symbol !== 'MNQ' && w.symbol !== 'NQ') as MarketQuote[];
-        return { data: [quote, ...others] };
+        const quotes = await botApiService.getQuotes();
+        if (quotes.length > 0) return { data: quotes };
       } catch {
-        console.warn('Bot state unavailable for watchlist, using mock data');
-        return { data: mockWatchlist as MarketQuote[] };
+        console.warn('Bot quotes API unavailable, using mock data');
       }
+      return { data: mockWatchlist as MarketQuote[] };
     }
     try {
       return await apiClient.get<MarketQuote[]>('/market-data/watchlist');

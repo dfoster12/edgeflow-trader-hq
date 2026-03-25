@@ -9,8 +9,8 @@ export function useWatchlist() {
       const res = await marketDataService.getWatchlist();
       return res.data;
     },
-    // Market data can be refreshed more frequently when live
-    refetchInterval: false, // TODO: Set to 5000 (5s) when live market data is connected
+    // Refresh every 10 seconds for live market data
+    refetchInterval: 10_000,
   });
 }
 
