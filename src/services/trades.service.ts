@@ -1,11 +1,20 @@
 import { apiClient } from './api-client';
+import { botApiService } from './bot-api.service';
 import env from '@/config/env';
 import { recentTrades, openPositions as mockPositions, analyticsData } from '@/data/mockData';
 import type { Trade, OpenPosition, CreateTradeInput, UpdateTradeInput, ApiResponse } from '@/types';
 
 export const tradesService = {
   async getAll(): Promise<ApiResponse<Trade[]>> {
-    if (env.useMockData) return { data: recentTrades as Trade[] };
+    if (env.useMockData && !botApiService.isConfigured()) return { data: recentTrades as Trade[] };
+    if (botApiService.isConfigured()) {
+      try {
+        return { data: await botApiService.getTrades() };
+      } catch {
+        console.warn('Bot trades API unavailable, using mock data');
+        return { data: recentTrades as Trade[] };
+      }
+    }
     try {
       return await apiClient.get<Trade[]>('/trades');
     } catch {
@@ -63,7 +72,15 @@ export const tradesService = {
   },
 
   async getOpenPositions(): Promise<ApiResponse<OpenPosition[]>> {
-    if (env.useMockData) return { data: mockPositions as OpenPosition[] };
+    if (env.useMockData && !botApiService.isConfigured()) return { data: mockPositions as OpenPosition[] };
+    if (botApiService.isConfigured()) {
+      try {
+        return { data: await botApiService.getOpenPositions() };
+      } catch {
+        console.warn('Bot positions API unavailable, using mock data');
+        return { data: mockPositions as OpenPosition[] };
+      }
+    }
     try {
       return await apiClient.get<OpenPosition[]>('/trades/positions');
     } catch {

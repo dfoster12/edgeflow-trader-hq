@@ -19,6 +19,9 @@ const env = {
   /** Base URL for API calls. In production, this is the same origin (Cloudflare Pages Functions). */
   apiBaseUrl: import.meta.env.VITE_API_BASE_URL || '/api',
 
+  /** Base URL for the NQ trading bot API (e.g. http://192.168.1.141:8080) */
+  botApiUrl: import.meta.env.VITE_BOT_API_URL || '',
+
   /** Whether to use mock data instead of real API calls */
   useMockData: import.meta.env.VITE_USE_MOCK_DATA !== 'false',
 

@@ -1,11 +1,20 @@
 import { apiClient } from './api-client';
+import { botApiService } from './bot-api.service';
 import env from '@/config/env';
 import { kpiData as mockKpis, notifications as mockNotifications } from '@/data/mockData';
 import type { DashboardKpis, Notification, ApiResponse } from '@/types';
 
 export const dashboardService = {
   async getKpis(): Promise<ApiResponse<DashboardKpis>> {
-    if (env.useMockData) return { data: mockKpis };
+    if (env.useMockData && !botApiService.isConfigured()) return { data: mockKpis };
+    if (botApiService.isConfigured()) {
+      try {
+        return { data: await botApiService.getKpis() };
+      } catch {
+        console.warn('Bot API unavailable, using mock data');
+        return { data: mockKpis };
+      }
+    }
     try {
       return await apiClient.get<DashboardKpis>('/analytics/kpis');
     } catch {
